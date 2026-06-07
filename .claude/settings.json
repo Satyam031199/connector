@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm install @clerk/nextjs drizzle-orm postgres zod)",
+      "PowerShell(npm install -D drizzle-kit)"
+    ]
+  }
+}

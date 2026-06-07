@@ -1,0 +1,77 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { HeartIcon, MessageCircleIcon } from "lucide-react";
+import { toast } from "sonner";
+
+import { toggleLike } from "@/app/actions/toggle-like";
+import { PostComments } from "@/components/feed/post-comments";
+import { cn } from "@/lib/utils";
+
+type PostActionsProps = {
+  postId: string;
+  isLiked: boolean;
+  /** Post metadata (counts + caption), server-rendered and shown below the actions. */
+  children: React.ReactNode;
+};
+
+/**
+ * Interactive post footer: action buttons, the server-rendered metadata
+ * (passed as children), and the expandable comments section.
+ *
+ * The Like button triggers `toggleLike`; the Comment button toggles an inline
+ * comments section. The feed revalidates server-side so counts and liked state
+ * refresh without optimistic updates.
+ */
+export function PostActions({ postId, isLiked, children }: PostActionsProps) {
+  const [isPending, startTransition] = useTransition();
+  const [commentsOpen, setCommentsOpen] = useState(false);
+
+  function handleLike() {
+    if (isPending) return;
+
+    startTransition(async () => {
+      const result = await toggleLike(postId);
+      if (!result.ok) {
+        toast.error(result.error);
+      }
+    });
+  }
+
+  return (
+    <>
+      <div className="flex items-center gap-0.5 px-2 pt-1.5">
+        <button
+          type="button"
+          onClick={handleLike}
+          disabled={isPending}
+          aria-label={isLiked ? "Unlike" : "Like"}
+          aria-pressed={isLiked}
+          className="inline-flex size-9 items-center justify-center rounded-full text-foreground transition hover:bg-muted active:scale-90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:opacity-50"
+        >
+          <HeartIcon
+            className={cn(
+              "size-6 transition-colors",
+              isLiked && "fill-destructive text-destructive",
+            )}
+          />
+        </button>
+        <button
+          type="button"
+          onClick={() => setCommentsOpen((open) => !open)}
+          aria-label="Comments"
+          aria-expanded={commentsOpen}
+          className="inline-flex size-9 items-center justify-center rounded-full text-foreground transition hover:bg-muted active:scale-90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        >
+          <MessageCircleIcon
+            className={cn("size-6", commentsOpen && "fill-muted")}
+          />
+        </button>
+      </div>
+
+      {children}
+
+      {commentsOpen ? <PostComments postId={postId} /> : null}
+    </>
+  );
+}
