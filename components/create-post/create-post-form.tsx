@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ImagePicker } from "@/components/create-post/image-picker";
 import { ImagePreview } from "@/components/create-post/image-preview";
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB } from "@/lib/image";
 import { MAX_CAPTION_LENGTH } from "@/validations/post";
 
 type SelectedImage = { file: File; url: string };
@@ -28,6 +29,7 @@ export function CreatePostForm() {
 
   const [image, setImage] = useState<SelectedImage | null>(null);
   const [caption, setCaption] = useState("");
+  const [imageError, setImageError] = useState<string | null>(null);
 
   // Track the active object URL so we can revoke it on unmount without
   // calling setState inside an effect.
@@ -44,12 +46,23 @@ export function CreatePostForm() {
     if (!file) {
       urlRef.current = null;
       setImage(null);
+      setImageError(null);
+      return;
+    }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      urlRef.current = null;
+      setImage(null);
+      setImageError(
+        `That image is ${(file.size / (1024 * 1024)).toFixed(1)} MB. Please choose a file under ${MAX_UPLOAD_MB} MB.`,
+      );
       return;
     }
 
     const url = URL.createObjectURL(file);
     urlRef.current = url;
     setImage({ file, url });
+    setImageError(null);
   }
 
   function handleSubmit() {
@@ -81,7 +94,16 @@ export function CreatePostForm() {
         {image ? (
           <ImagePreview src={image.url} onClear={() => selectFile(null)} />
         ) : null}
-        <ImagePicker onSelect={selectFile} hasImage={Boolean(image)} />
+        <ImagePicker
+          onSelect={selectFile}
+          hasImage={Boolean(image)}
+          invalid={Boolean(imageError)}
+        />
+        {imageError ? (
+          <p role="alert" className="text-sm text-destructive">
+            {imageError}
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-2">

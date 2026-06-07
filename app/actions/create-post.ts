@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { createPost as insertPost } from "@/app/db/queries/posts";
 import { getCurrentUser } from "@/app/lib/auth";
-import { detectImageType, MAX_UPLOAD_BYTES } from "@/lib/image";
+import { detectImageType, MAX_UPLOAD_BYTES, MAX_UPLOAD_MB } from "@/lib/image";
 import { uploadImage } from "@/lib/s3";
 import { captionSchema } from "@/validations/post";
 
@@ -49,7 +49,7 @@ export async function createPost(
     return { ok: false, error: "Please select an image." };
   }
   if (file.size > MAX_UPLOAD_BYTES) {
-    return { ok: false, error: "Image exceeds the 10 MB limit." };
+    return { ok: false, error: `Image exceeds the ${MAX_UPLOAD_MB} MB limit.` };
   }
 
   const bytes = new Uint8Array(await file.arrayBuffer());

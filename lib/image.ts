@@ -5,7 +5,10 @@
  * client-supplied `Content-Type`, which must not be trusted.
  */
 
-export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
+// Capped to stay under Vercel's ~4.5MB serverless request-body limit, since the
+// image is uploaded through a Server Action (which routes through the server).
+export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // 4 MB
+export const MAX_UPLOAD_MB = MAX_UPLOAD_BYTES / (1024 * 1024);
 
 export type DetectedImage = {
   contentType: "image/jpeg" | "image/png" | "image/webp";

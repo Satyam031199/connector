@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-import { detectImageType, MAX_UPLOAD_BYTES } from "@/lib/image";
+import { detectImageType, MAX_UPLOAD_BYTES, MAX_UPLOAD_MB } from "@/lib/image";
 import { uploadImage } from "@/lib/s3";
 
 /**
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
   // 4. File size (reject oversized before reading is best-effort; enforce on bytes).
   if (file.size > MAX_UPLOAD_BYTES) {
     return NextResponse.json(
-      { error: "File exceeds the 10 MB limit" },
+      { error: `File exceeds the ${MAX_UPLOAD_MB} MB limit` },
       { status: 413 },
     );
   }
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
   if (bytes.byteLength > MAX_UPLOAD_BYTES) {
     return NextResponse.json(
-      { error: "File exceeds the 10 MB limit" },
+      { error: `File exceeds the ${MAX_UPLOAD_MB} MB limit` },
       { status: 413 },
     );
   }

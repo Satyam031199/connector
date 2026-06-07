@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { ImageUpIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /** Accepted image MIME types for the picker (matches the upload endpoint). */
 const ACCEPTED_TYPES = "image/jpeg,image/png,image/webp";
@@ -13,6 +14,8 @@ type ImagePickerProps = {
   onSelect: (file: File | null) => void;
   /** Whether an image is already selected (affects empty-state visibility). */
   hasImage: boolean;
+  /** Whether the last selection was rejected (styles the dropzone as invalid). */
+  invalid?: boolean;
 };
 
 /**
@@ -21,7 +24,7 @@ type ImagePickerProps = {
  * Single image only. No upload occurs — the selected file is handed to the
  * parent for local preview state.
  */
-export function ImagePicker({ onSelect, hasImage }: ImagePickerProps) {
+export function ImagePicker({ onSelect, hasImage, invalid }: ImagePickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -49,10 +52,25 @@ export function ImagePicker({ onSelect, hasImage }: ImagePickerProps) {
           type="button"
           onClick={openPicker}
           aria-label="Select an image to upload"
-          className="flex w-full flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center transition-colors hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          className={cn(
+            "flex w-full flex-col items-center justify-center gap-3 rounded-xl border border-dashed bg-card px-6 py-12 text-center transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:outline-none",
+            invalid
+              ? "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/30"
+              : "border-border focus-visible:border-ring focus-visible:ring-ring/50",
+          )}
         >
-          <ImageUpIcon className="size-8 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">
+          <ImageUpIcon
+            className={cn(
+              "size-8",
+              invalid ? "text-destructive" : "text-muted-foreground",
+            )}
+          />
+          <span
+            className={cn(
+              "text-sm",
+              invalid ? "text-destructive" : "text-muted-foreground",
+            )}
+          >
             Select an image to preview.
           </span>
         </button>
