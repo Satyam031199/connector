@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@/app/db";
 import { posts, type NewPost } from "@/app/db/schema";
@@ -24,4 +24,18 @@ export async function postExists(postId: string): Promise<boolean> {
     .limit(1);
 
   return result.length > 0;
+}
+
+export async function getPostForDeletion(postId: string) {
+  const result = await db
+    .select({ id: posts.id, userId: posts.userId, imageUrl: posts.imageUrl })
+    .from(posts)
+    .where(eq(posts.id, postId))
+    .limit(1);
+
+  return result[0] ?? null;
+}
+
+export async function deletePostById(postId: string, userId: string): Promise<void> {
+  await db.delete(posts).where(and(eq(posts.id, postId), eq(posts.userId, userId)));
 }

@@ -3,9 +3,6 @@ import { ImagePlusIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-/**
- * Shown when there are no posts to display.
- */
 export function FeedEmptyState() {
   return (
     <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-card px-6 py-16 text-center">
@@ -14,14 +11,14 @@ export function FeedEmptyState() {
       </div>
       <div className="space-y-1">
         <h2 className="font-heading text-lg font-medium text-foreground">
-          No posts yet
+          Create your first post
         </h2>
         <p className="text-sm text-muted-foreground">
-          Create your first post to get started.
+          Share a photo with everyone on Connector.
         </p>
       </div>
       <Button asChild>
-        <Link href="/create">Create post</Link>
+        <Link href="/create">Create Post</Link>
       </Button>
     </div>
   );

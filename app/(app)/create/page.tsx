@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import {
   Card,
   CardContent,
@@ -6,6 +8,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CreatePostForm } from "@/components/create-post/create-post-form";
+
+export const metadata: Metadata = { title: "Create Post | Connector" };
 
 export default function CreatePostPage() {
   return (

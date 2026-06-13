@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { getFeedPosts } from "@/app/db/queries/get-feed-posts";
 import { FeedList } from "@/components/feed/feed-list";
 import { PostSkeleton } from "@/components/feed/post-skeleton";
 import type { FeedPost } from "@/types/feed";
+
+export const metadata: Metadata = { title: "Connector" };
 
 // The feed reflects all users' posts, so it must render per request.
 export const dynamic = "force-dynamic";

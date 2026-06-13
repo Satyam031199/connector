@@ -1,19 +1,28 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
-import { ImagePlusIcon, UserIcon } from "lucide-react";
+import { HomeIcon, ImagePlusIcon, UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-/**
- * Top navigation for authenticated app pages.
- *
- * Logo links home, a Create action links to /create, and the Clerk user button
- * provides the account menu. Sticky and responsive.
- */
+const navLinks = [
+  { href: "/", label: "Feed", icon: HomeIcon },
+  { href: "/create", label: "Create", icon: ImagePlusIcon },
+  { href: "/profile", label: "Profile", icon: UserIcon },
+];
+
 export function Navbar() {
+  const pathname = usePathname();
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur">
-      <nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-4 px-4">
+      <nav
+        aria-label="Primary navigation"
+        className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-4 px-4"
+      >
         <Link
           href="/"
           className="font-heading text-2xl font-semibold tracking-tight transition-opacity hover:opacity-80"
@@ -21,33 +30,28 @@ export function Navbar() {
           Connector
         </Link>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Button
-            asChild
-            variant="ghost"
-            size="lg"
-            className="group transition-all hover:bg-muted hover:text-foreground active:scale-95"
-          >
-            <Link href="/create">
-              <ImagePlusIcon className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:scale-110" />
-              <span className="hidden sm:inline">Create</span>
-            </Link>
-          </Button>
-
-          <Button
-            asChild
-            variant="ghost"
-            size="lg"
-            className="group transition-all hover:bg-muted hover:text-foreground active:scale-95"
-          >
-            <Link href="/profile">
-              <UserIcon className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:scale-110" />
-              <span className="hidden sm:inline">Profile</span>
-            </Link>
-          </Button>
-
-          <UserButton />
+        <div className="hidden items-center gap-1 sm:flex" role="list">
+          {navLinks.map(({ href, label, icon: Icon }) => {
+            const isActive = pathname === href;
+            return (
+              <Button
+                key={href}
+                asChild
+                variant={isActive ? "secondary" : "ghost"}
+                size="sm"
+                className={cn("transition-all", isActive && "font-medium")}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <Link href={href} role="listitem">
+                  <Icon className="size-4" />
+                  <span>{label}</span>
+                </Link>
+              </Button>
+            );
+          })}
         </div>
+
+        <UserButton />
       </nav>
     </header>
   );

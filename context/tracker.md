@@ -14,9 +14,30 @@
 - [x] 10 Comments — complete (view + create; oldest-first)
 - [x] 11 Profile — complete (view, edit name/bio, posts grid)
 
+- [x] 12 Navigation Polish — complete
+- [x] 13 Delete Post — complete
+
 ## MVP status
 
-All planned sections (01–11) complete. The MVP social flow works: auth, create post (S3), feed, likes, comments, profiles.
+All planned sections (01–13) complete. The MVP social flow works: auth, create post (S3), feed, likes, comments, profiles, navigation polish, delete post.
+
+## Section 13 decisions
+
+- `FeedPost` contract extended with `isOwnPost: boolean`; computed in `getFeedPosts` by comparing `posts.userId` with the current DB user id (reuses the `currentUserId` already resolved for `isLiked`; no extra query).
+- Post deletion uses a two-step ownership pattern: fetch the post row to confirm ownership and obtain the `imageUrl`, then delete with `AND userId` guard for safety.
+- S3 cleanup runs after the DB delete. Failures are logged but swallowed — the post is already gone from the DB and S3 orphans are preferable to leaving a DB row that references a deleted object.
+- Three-dot menu (`PostDeleteButton`) uses shadcn `DropdownMenu` + `AlertDialog`; only rendered for `isOwnPost` posts inside `PostHeader`.
+- shadcn `dropdown-menu` and `alert-dialog` added.
+
+## Section 12 decisions
+
+- Navbar converted to `"use client"` to use `usePathname` for active state detection; no server-side data needed so there is no cost.
+- Desktop nav: Feed/Create/Profile buttons with `variant="secondary"` for the active route and `variant="ghost"` otherwise; top nav links hidden on mobile (`hidden sm:flex`).
+- Mobile nav: new `components/mobile-nav.tsx`, fixed bottom bar (`sm:hidden`), same three routes, active indicated via `strokeWidth` and `font-semibold`.
+- App layout adds `pb-16 sm:pb-0` to `<main>` so content is not obscured by the mobile bottom nav.
+- Page titles: Feed → "Connector", Create → "Create Post | Connector", Profile → "Profile | Connector".
+- Feed empty state heading updated to "Create your first post" per spec; button label capitalised to "Create Post".
+- Profile empty state button capitalised to "Create Post" (own-profile only, already guarded by `isOwnProfile`).
 
 ## Possible follow-ups (not yet specced)
 

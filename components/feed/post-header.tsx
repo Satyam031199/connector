@@ -1,15 +1,18 @@
 import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { PostDeleteButton } from "@/components/feed/post-delete-button";
 import { formatRelativeTime } from "@/lib/format";
 
 type PostHeaderProps = {
+  postId: string;
   username: string;
   userImage: string | null;
   createdAt: Date;
+  isOwnPost: boolean;
 };
 
-export function PostHeader({ username, userImage, createdAt }: PostHeaderProps) {
+export function PostHeader({ postId, username, userImage, createdAt, isOwnPost }: PostHeaderProps) {
   const profileHref = `/username/${username}`;
 
   return (
@@ -40,6 +43,8 @@ export function PostHeader({ username, userImage, createdAt }: PostHeaderProps) 
           {formatRelativeTime(createdAt)}
         </time>
       </div>
+
+      {isOwnPost ? <PostDeleteButton postId={postId} /> : null}
     </div>
   );
 }

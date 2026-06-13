@@ -16,9 +16,11 @@ export function PostCard({ post }: { post: FeedPost }) {
   return (
     <Card className="gap-0 overflow-hidden py-0 shadow-sm">
       <PostHeader
+        postId={post.id}
         username={author.username}
         userImage={author.imageUrl}
         createdAt={post.createdAt}
+        isOwnPost={post.isOwnPost}
       />
 
       <PostImage

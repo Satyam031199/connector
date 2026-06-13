@@ -21,4 +21,7 @@ export type FeedPost = {
 
   /** Whether the currently authenticated user has liked this post. */
   isLiked: boolean;
+
+  /** Whether the currently authenticated user authored this post. */
+  isOwnPost: boolean;
 };

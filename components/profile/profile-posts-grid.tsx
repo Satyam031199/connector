@@ -26,7 +26,7 @@ export function ProfilePostsGrid({ posts, isOwnProfile }: ProfilePostsGridProps)
         </div>
         {isOwnProfile ? (
           <Button asChild>
-            <Link href="/create">Create post</Link>
+            <Link href="/create">Create Post</Link>
           </Button>
         ) : null}
       </div>

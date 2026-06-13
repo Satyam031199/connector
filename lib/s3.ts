@@ -2,7 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 import { env } from "@/app/lib/env";
 
@@ -40,6 +40,27 @@ type UploadImageArgs = {
   contentType: string;
   extension: string;
 };
+
+/**
+ * Extracts the S3 object key from a virtual-hosted-style URL.
+ * e.g. https://bucket.s3.region.amazonaws.com/uploads/uid/post_x.jpg → uploads/uid/post_x.jpg
+ */
+function extractObjectKey(imageUrl: string): string {
+  const url = new URL(imageUrl);
+  return url.pathname.slice(1); // strip leading "/"
+}
+
+/** Deletes an image from S3 by its public URL. Throws on failure. */
+export async function deleteImage(imageUrl: string): Promise<void> {
+  const key = extractObjectKey(imageUrl);
+
+  await s3.send(
+    new DeleteObjectCommand({
+      Bucket: env.AWS_S3_BUCKET_NAME,
+      Key: key,
+    }),
+  );
+}
 
 /** Uploads an image to S3 and returns its public URL. */
 export async function uploadImage({
