@@ -78,5 +78,6 @@ export async function getFeedPosts(): Promise<FeedPost[]> {
     commentsCount: row.commentsCount ?? 0,
     isLiked: row.likedId !== null,
     isOwnPost: row.authorId === currentUserId,
+    currentUserId: currentUser?.id ?? null,
   }));
 }

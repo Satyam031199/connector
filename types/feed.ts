@@ -24,4 +24,7 @@ export type FeedPost = {
 
   /** Whether the currently authenticated user authored this post. */
   isOwnPost: boolean;
+
+  /** The database ID of the currently authenticated user (null if not signed in). */
+  currentUserId: string | null;
 };

@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 type PostActionsProps = {
   postId: string;
   isLiked: boolean;
+  currentUserId: string | null;
   /** Post metadata (counts + caption), server-rendered and shown below the actions. */
   children: React.ReactNode;
 };
@@ -23,7 +24,7 @@ type PostActionsProps = {
  * comments section. The feed revalidates server-side so counts and liked state
  * refresh without optimistic updates.
  */
-export function PostActions({ postId, isLiked, children }: PostActionsProps) {
+export function PostActions({ postId, isLiked, currentUserId, children }: PostActionsProps) {
   const [isPending, startTransition] = useTransition();
   const [commentsOpen, setCommentsOpen] = useState(false);
 
@@ -71,7 +72,7 @@ export function PostActions({ postId, isLiked, children }: PostActionsProps) {
 
       {children}
 
-      {commentsOpen ? <PostComments postId={postId} /> : null}
+      {commentsOpen ? <PostComments postId={postId} currentUserId={currentUserId} /> : null}
     </>
   );
 }

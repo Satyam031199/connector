@@ -32,7 +32,7 @@ export function PostCard({ post }: { post: FeedPost }) {
         }
       />
 
-      <PostActions postId={post.id} isLiked={post.isLiked}>
+      <PostActions postId={post.id} isLiked={post.isLiked} currentUserId={post.currentUserId}>
         <div className="space-y-1.5 px-4 pb-4 pt-1.5">
           <p className="text-sm font-semibold text-foreground">
             {pluralize(post.likesCount, "like")}

@@ -2,30 +2,51 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { Loader2Icon } from "lucide-react";
+import { Loader2Icon, MoreHorizontalIcon } from "lucide-react";
 import { toast } from "sonner";
 
-import { createComment, getCommentsForPost } from "@/app/actions/comments";
+import {
+  createComment,
+  deleteComment,
+  getCommentsForPost,
+} from "@/app/actions/comments";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { formatRelativeTime } from "@/lib/format";
 import type { Comment } from "@/types/comment";
 import { MAX_COMMENT_LENGTH } from "@/validations/comment";
 
-/**
- * Inline comments section for a post.
- *
- * Mounted only when the comments section is open, so it lazily loads comments
- * via a server action. New comments are appended on success; the feed's comment
- * count updates separately via server revalidation.
- */
-export function PostComments({ postId }: { postId: string }) {
+export function PostComments({
+  postId,
+  currentUserId,
+}: {
+  postId: string;
+  currentUserId: string | null;
+}) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [content, setContent] = useState("");
   const [isSubmitting, startSubmit] = useTransition();
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [isDeleting, startDelete] = useTransition();
 
   useEffect(() => {
     let active = true;
@@ -60,6 +81,20 @@ export function PostComments({ postId }: { postId: string }) {
     });
   }
 
+  function handleConfirmDelete() {
+    if (!confirmDeleteId || isDeleting) return;
+    const id = confirmDeleteId;
+    startDelete(async () => {
+      const result = await deleteComment(id);
+      if (!result.ok) {
+        toast.error(result.error);
+      } else {
+        setComments((prev) => prev.filter((c) => c.id !== id));
+      }
+      setConfirmDeleteId(null);
+    });
+  }
+
   return (
     <div className="space-y-4 border-t border-border px-4 py-4">
       {loading ? (
@@ -77,6 +112,8 @@ export function PostComments({ postId }: { postId: string }) {
         <ul className="space-y-4">
           {comments.map((comment) => {
             const profileHref = `/username/${comment.author.username}`;
+            const isOwn =
+              currentUserId !== null && comment.author.id === currentUserId;
             return (
               <li key={comment.id} className="flex items-start gap-2.5">
                 <Link
@@ -109,13 +146,37 @@ export function PostComments({ postId }: { postId: string }) {
                     {formatRelativeTime(comment.createdAt)}
                   </p>
                 </div>
+                {isOwn ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Comment actions"
+                        className="inline-flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                      >
+                        <MoreHorizontalIcon className="size-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onSelect={() => setConfirmDeleteId(comment.id)}
+                      >
+                        Delete comment
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : null}
               </li>
             );
           })}
         </ul>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-2 border-t border-border pt-4">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-2 border-t border-border pt-4"
+      >
         <Textarea
           aria-label="Add a comment"
           placeholder="Add a comment..."
@@ -142,6 +203,40 @@ export function PostComments({ postId }: { postId: string }) {
           </Button>
         </div>
       </form>
+
+      <AlertDialog
+        open={confirmDeleteId !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmDeleteId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete comment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this comment? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2Icon className="animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

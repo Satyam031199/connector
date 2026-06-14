@@ -3,13 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { getPostComments, insertComment } from "@/app/db/queries/comments";
+import {
+  deleteComment as deleteCommentQuery,
+  getPostComments,
+  insertComment,
+} from "@/app/db/queries/comments";
 import { postExists } from "@/app/db/queries/posts";
 import { getCurrentUser } from "@/app/lib/auth";
 import type { Comment } from "@/types/comment";
 import { commentContentSchema } from "@/validations/comment";
 
 const postIdSchema = z.uuid();
+const commentIdSchema = z.uuid();
 
 export type CreateCommentResult =
   | { ok: true; comment: Comment }
@@ -18,6 +23,8 @@ export type CreateCommentResult =
 export type GetCommentsResult =
   | { ok: true; comments: Comment[] }
   | { ok: false; error: string };
+
+export type DeleteCommentResult = { ok: true } | { ok: false; error: string };
 
 /**
  * Loads a post's comments (oldest first) for the inline comments section.
@@ -101,5 +108,37 @@ export async function createComment(
   } catch (error) {
     console.error("Create comment failed:", error);
     return { ok: false, error: "Could not post your comment. Please try again." };
+  }
+}
+
+/**
+ * Deletes a comment owned by the current user.
+ *
+ * Authenticates, verifies ownership via a userId-scoped DELETE (no separate
+ * fetch needed), revalidates the feed so counts update.
+ */
+export async function deleteComment(
+  commentId: string,
+): Promise<DeleteCommentResult> {
+  if (!commentIdSchema.safeParse(commentId).success) {
+    return { ok: false, error: "Invalid comment." };
+  }
+
+  const user = await getCurrentUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in to delete a comment." };
+  }
+
+  try {
+    const deleted = await deleteCommentQuery(commentId, user.id);
+    if (!deleted) {
+      return { ok: false, error: "Comment not found or you don't have permission to delete it." };
+    }
+
+    revalidatePath("/");
+    return { ok: true };
+  } catch (error) {
+    console.error("Delete comment failed:", error);
+    return { ok: false, error: "Could not delete the comment. Please try again." };
   }
 }

@@ -17,9 +17,20 @@
 - [x] 12 Navigation Polish — complete
 - [x] 13 Delete Post — complete
 
+- [x] 14 Delete Comment — complete
+
 ## MVP status
 
-All planned sections (01–13) complete. The MVP social flow works: auth, create post (S3), feed, likes, comments, profiles, navigation polish, delete post.
+All planned sections (01–14) complete. The MVP social flow works: auth, create post (S3), feed, likes, comments, profiles, navigation polish, delete post, delete comment.
+
+## Section 14 decisions
+
+- `FeedPost` contract extended with `currentUserId: string | null`; computed in `getFeedPosts` from the already-resolved `currentUser` (no extra query).
+- `deleteComment` DB query uses a userId-scoped `AND` in the WHERE clause — ownership is verified atomically in a single DELETE, no extra SELECT needed.
+- `deleteComment` server action validates commentId as UUID, authenticates via `getCurrentUser`, calls the scoped query, revalidates `/`.
+- Three-dot menu (`MoreHorizontalIcon`) on each comment; only rendered when `comment.author.id === currentUserId`. Uses existing shadcn `DropdownMenu` + `AlertDialog` (installed in Section 13).
+- On successful delete, comment removed from local `comments` state immediately; feed count updates via `revalidatePath("/")`.
+- `confirmDeleteId` state (string | null) drives the AlertDialog — avoids one dialog per comment; a single dialog handles whichever comment was selected.
 
 ## Section 13 decisions
 
@@ -41,7 +52,6 @@ All planned sections (01–13) complete. The MVP social flow works: auth, create
 
 ## Possible follow-ups (not yet specced)
 
-- Comment delete-own (was out of scope in 10).
 - Profile route is literally `/username/[username]` per spec 11.
 - Consider next/image + remotePatterns for S3/CDN images (currently plain <img>).
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 
 import { db } from "@/app/db";
 import { comments, users, type NewComment } from "@/app/db/schema";
@@ -46,4 +46,13 @@ type InsertCommentValues = Pick<NewComment, "userId" | "postId" | "content">;
 export async function insertComment(values: InsertCommentValues) {
   const result = await db.insert(comments).values(values).returning();
   return result[0] ?? null;
+}
+
+/** Deletes a comment owned by userId. Returns true if a row was deleted. */
+export async function deleteComment(commentId: string, userId: string): Promise<boolean> {
+  const result = await db
+    .delete(comments)
+    .where(and(eq(comments.id, commentId), eq(comments.userId, userId)))
+    .returning({ id: comments.id });
+  return result.length > 0;
 }
