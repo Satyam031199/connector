@@ -19,9 +19,32 @@
 
 - [x] 14 Delete Comment — complete
 
+- [x] 15 Feed Pagination — complete (cursor-based, Load More button)
+- [x] 16 Post Details Page — complete (/post/[postId], likes + comments integrated)
+
 ## MVP status
 
-All planned sections (01–14) complete. The MVP social flow works: auth, create post (S3), feed, likes, comments, profiles, navigation polish, delete post, delete comment.
+All planned sections (01–16) complete. The MVP social flow works: auth, create post (S3), feed with cursor-based pagination, likes, comments, profiles, navigation polish, delete post, delete comment, post details page.
+
+## Section 16 decisions
+
+- Route `/post/[postId]` inside `(app)` group — protected by proxy, `force-dynamic` for per-user `isLiked`/`currentUserId`.
+- `getPostById(postId)` in `app/db/queries/get-post-by-id.ts`: same subquery aggregation pattern as `getFeedPosts` for counts + isLiked, then `getPostComments` in a second query. Returns `PostDetail | null`.
+- `generateMetadata` awaits params (Next 16 pattern) and fetches the post title; falls back gracefully on DB error.
+- `PostComments` gained an optional `initialComments?: Comment[]` prop — when provided, skips the lazy client-side fetch. Feed usage unchanged (no prop → lazy fetch). Details page passes pre-fetched comments.
+- `LikeButton` extracted from `PostActions` into `components/feed/like-button.tsx`; manages its own `useTransition`. `PostActions` simplified (removed its own transition/like handler). Post details page uses `LikeButton` directly without needing `PostActions`.
+- `not-found.tsx` at `app/(app)/post/[postId]/not-found.tsx` provides a friendly "Post not found" + "Back to feed" link. `notFound()` called for both missing post and invalid UUID.
+- Feed image (`PostCard`) wrapped in `<Link href="/post/[id]">` — clicking the image navigates to the detail page.
+- Profile grid (`ProfilePostsGrid`) each `<img>` wrapped in `<Link href="/post/[id]">`.
+
+## Section 15 decisions
+
+- `getFeedPosts` updated to accept `{ cursor?, limit? }` and return `{ posts, nextCursor, hasMore }`. Exported `FeedPage` type and `FEED_PAGE_SIZE = 10` constant.
+- Cursor encodes `createdAt.toISOString()|id` as base64url for opacity. Decoded on the server; invalid cursors are treated as no-cursor (safe degradation).
+- Query orders by `desc(createdAt), desc(id)` and fetches `limit + 1` rows to detect `hasMore`. Cursor condition: `createdAt < cursorDate OR (createdAt = cursorDate AND id < cursorId)`.
+- `app/actions/load-feed.ts` `loadFeedPage({ cursor })`: thin server action wrapper; returns `{ ok: true, ...FeedPage }` or `{ ok: false, error }`.
+- `FeedList` converted to `"use client"`. Accepts `initialPosts`, `initialNextCursor`, `initialHasMore`. `useTransition` drives the Load More call; accumulated posts append to local state. Skeletons render below existing posts while loading. Load More button hidden when `!hasMore`.
+- Feed page (`app/(app)/page.tsx`) passes pagination data down — structure unchanged (server component + Suspense).
 
 ## Section 14 decisions
 

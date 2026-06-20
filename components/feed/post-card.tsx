@@ -23,14 +23,16 @@ export function PostCard({ post }: { post: FeedPost }) {
         isOwnPost={post.isOwnPost}
       />
 
-      <PostImage
-        src={post.imageUrl}
-        alt={
-          post.caption
-            ? `${author.username}: ${post.caption}`
-            : `Post by ${author.username}`
-        }
-      />
+      <Link href={`/post/${post.id}`} className="block">
+        <PostImage
+          src={post.imageUrl}
+          alt={
+            post.caption
+              ? `${author.username}: ${post.caption}`
+              : `Post by ${author.username}`
+          }
+        />
+      </Link>
 
       <PostActions postId={post.id} isLiked={post.isLiked} currentUserId={post.currentUserId}>
         <div className="space-y-1.5 px-4 pb-4 pt-1.5">

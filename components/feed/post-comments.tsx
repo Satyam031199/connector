@@ -36,12 +36,15 @@ import { MAX_COMMENT_LENGTH } from "@/validations/comment";
 export function PostComments({
   postId,
   currentUserId,
+  initialComments,
 }: {
   postId: string;
   currentUserId: string | null;
+  /** Pre-fetched comments — skips the client-side fetch when provided. */
+  initialComments?: Comment[];
 }) {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState<Comment[]>(initialComments ?? []);
+  const [loading, setLoading] = useState(initialComments === undefined);
   const [loadError, setLoadError] = useState(false);
   const [content, setContent] = useState("");
   const [isSubmitting, startSubmit] = useTransition();
@@ -49,6 +52,8 @@ export function PostComments({
   const [isDeleting, startDelete] = useTransition();
 
   useEffect(() => {
+    if (initialComments !== undefined) return;
+
     let active = true;
 
     getCommentsForPost(postId).then((result) => {
@@ -64,7 +69,7 @@ export function PostComments({
     return () => {
       active = false;
     };
-  }, [postId]);
+  }, [postId, initialComments]);
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();

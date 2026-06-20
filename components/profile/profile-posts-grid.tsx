@@ -37,12 +37,14 @@ export function ProfilePostsGrid({ posts, isOwnProfile }: ProfilePostsGridProps)
     <ul className="grid grid-cols-2 gap-1 sm:grid-cols-3 sm:gap-2">
       {posts.map((post) => (
         <li key={post.id} className="overflow-hidden rounded-md bg-muted">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={post.imageUrl}
-            alt={post.caption ?? "Post image"}
-            className="aspect-square w-full object-cover"
-          />
+          <Link href={`/post/${post.id}`} className="block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={post.imageUrl}
+              alt={post.caption ?? "Post image"}
+              className="aspect-square w-full object-cover transition-opacity hover:opacity-90"
+            />
+          </Link>
         </li>
       ))}
     </ul>
