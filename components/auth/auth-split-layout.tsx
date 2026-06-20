@@ -1,13 +1,29 @@
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 
-const TESTIMONIAL = {
-  quote:
-    "Connector has completely changed how I keep up with the people I care about. Sharing moments has never felt this effortless.",
-  name: "Satyam Chaturvedi",
-  handle: "@satyam.xd",
-  initials: "SC",
-};
+const TESTIMONIALS = [
+  {
+    quote:
+      "Connector has completely changed how I keep up with the people I care about. Sharing moments has never felt this effortless.",
+    name: "Satyam Chaturvedi",
+    designation: "@satyam.xd",
+    src: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=3560&auto=format&fit=crop",
+  },
+  {
+    quote:
+      "I love how clean and simple Connector is. No noise, just the people and moments that matter.",
+    name: "Priya Sharma",
+    designation: "@priya.s",
+    src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=3540&auto=format&fit=crop",
+  },
+  {
+    quote:
+      "Finally a social platform that feels human. Connector is the only app I actually look forward to opening.",
+    name: "Alex Turner",
+    designation: "@alex.t",
+    src: "https://images.unsplash.com/photo-1623582854588-d60de57fa33f?q=80&w=3540&auto=format&fit=crop",
+  },
+];
 
 export function AuthSplitLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,7 +31,7 @@ export function AuthSplitLayout({ children }: { children: React.ReactNode }) {
       {/* ── Left panel — form ── */}
       <div className="relative flex w-full flex-col lg:w-1/2">
         {/* Brand */}
-        <div className="px-8 pt-8">
+        <div className="px-8 pt-8 hidden lg:block">
           <Link
             href="/"
             className="text-lg font-semibold tracking-tight text-foreground transition-opacity hover:opacity-80"
@@ -30,35 +46,9 @@ export function AuthSplitLayout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      {/* ── Right panel — testimonial (desktop only) ── */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-sidebar px-16 py-16">
-        <blockquote className="max-w-sm space-y-6">
-          <span
-            aria-hidden
-            className="block font-serif text-7xl leading-none text-muted-foreground select-none"
-          >
-            &ldquo;
-          </span>
-
-          <p className="text-2xl font-medium leading-snug text-foreground">
-            {TESTIMONIAL.quote}
-          </p>
-
-          <footer className="flex items-center gap-3">
-            <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" />
-              <AvatarFallback>{TESTIMONIAL.initials}</AvatarFallback>
-            </Avatar>
-            <div className="leading-tight">
-              <p className="text-sm font-semibold text-foreground">
-                {TESTIMONIAL.name}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {TESTIMONIAL.handle}
-              </p>
-            </div>
-          </footer>
-        </blockquote>
+      {/* ── Right panel — testimonials (desktop only) ── */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-sidebar">
+        <AnimatedTestimonials testimonials={TESTIMONIALS} autoplay />
       </div>
     </div>
   );
