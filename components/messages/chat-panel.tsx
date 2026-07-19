@@ -132,7 +132,7 @@ export function ChatPanel({
       <form
         ref={formRef}
         onSubmit={handleSubmit}
-        className="flex items-end gap-2 border-t border-border px-4 py-3"
+        className="flex items-center gap-2 border-t border-border px-4 py-3"
       >
         <Textarea
           aria-label="Type a message"
