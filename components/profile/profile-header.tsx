@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { EditProfileDialog } from "@/components/profile/edit-profile-dialog";
+import { MessageButton } from "@/components/profile/message-button";
 import type { Profile } from "@/types/profile";
 
 type ProfileHeaderProps = {
@@ -34,7 +35,9 @@ export function ProfileHeader({ profile, isOwnProfile }: ProfileHeaderProps) {
               </h1>
               {isOwnProfile ? (
                 <EditProfileDialog name={profile.name} bio={profile.bio} />
-              ) : null}
+              ) : (
+                <MessageButton otherUserId={profile.id} username={profile.username} />
+              )}
             </div>
 
             {/* Display name */}

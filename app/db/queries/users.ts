@@ -22,6 +22,16 @@ export async function getUserByClerkId(clerkId: string) {
   return result[0] ?? null;
 }
 
+export async function getUserById(userId: string) {
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  return result[0] ?? null;
+}
+
 export async function createUser(values: NewUser) {
   const result = await db
     .insert(users)

@@ -4,11 +4,17 @@ import { users } from "./users";
 import { posts } from "./posts";
 import { likes } from "./likes";
 import { comments } from "./comments";
+import { conversations } from "./conversations";
+import { conversationParticipants } from "./conversation-participants";
+import { messages } from "./messages";
 
 export * from "./users";
 export * from "./posts";
 export * from "./likes";
 export * from "./comments";
+export * from "./conversations";
+export * from "./conversation-participants";
+export * from "./messages";
 
 /**
  * ORM-level relationships.
@@ -22,6 +28,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   posts: many(posts),
   likes: many(likes),
   comments: many(comments),
+  conversationParticipants: many(conversationParticipants),
+  messages: many(messages),
 }));
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
@@ -52,5 +60,35 @@ export const commentsRelations = relations(comments, ({ one }) => ({
   post: one(posts, {
     fields: [comments.postId],
     references: [posts.id],
+  }),
+}));
+
+export const conversationsRelations = relations(conversations, ({ many }) => ({
+  participants: many(conversationParticipants),
+  messages: many(messages),
+}));
+
+export const conversationParticipantsRelations = relations(
+  conversationParticipants,
+  ({ one }) => ({
+    conversation: one(conversations, {
+      fields: [conversationParticipants.conversationId],
+      references: [conversations.id],
+    }),
+    user: one(users, {
+      fields: [conversationParticipants.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
   }),
 }));
